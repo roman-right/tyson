@@ -1,0 +1,29 @@
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+
+char = _{
+    !("|" | "\\") ~ ANY
+    | "\\" ~ ("|" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+    | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
+}
+
+prefix = @{ ( LETTER | NUMBER | "&" | "#" | "@" | "^" | "." )+ }
+
+value = @{ char* }
+
+separator = _{ ";" | "," }
+
+primitive = ${ ( prefix ~ ( "|" ~ value ~ "|" )? ) | ( ( prefix )? ~  "|" ~ value ~ "|"  ) }
+
+pair = { primitive ~ ":" ~ item }
+
+map_value = _{ "{" ~ "}" | "{" ~ pair ~ (separator ~ pair)* ~ (separator)? ~ "}" }
+
+map = { prefix ~ map_value | map_value }
+
+array_value = _{ "[" ~ "]" | "[" ~ primitive ~ (separator ~ primitive)* ~ (separator)? ~ "]" }
+
+array = { prefix ~ array_value | array_value }
+
+item = _{ map | array | primitive }
+
+doc = { SOI ~ pair ~ ( separator ~ pair )* ~ (separator)? ~ EOI }
