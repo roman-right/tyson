@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Primitive(pub String, pub String);
 
 
@@ -14,9 +14,26 @@ impl fmt::Display for Primitive {
     }
 }
 
-#[derive(Debug)]
-pub enum TysonValue {
+#[derive(Debug, Eq, PartialEq)]
+pub enum TYSONValue {
     Primitive(Primitive),
-    Map(String, Vec<(Primitive, TysonValue)>),
-    Array(String, Vec<TysonValue>),
+    Map(String, Vec<(Primitive, TYSONValue)>),
+    Vector(String, Vec<TYSONValue>),
+}
+
+#[derive(Debug)]
+pub struct TYSONDocument(Vec<(Primitive, TYSONValue)>);
+
+impl TYSONDocument {
+    pub fn new() -> Self{
+        Self(vec![])
+    }
+
+    pub fn push(&mut self, item: (Primitive, TYSONValue)){
+        self.0.push(item);
+    }
+
+    pub fn items(&self) -> &Vec<(Primitive, TYSONValue)>{
+        &self.0
+    }
 }

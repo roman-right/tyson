@@ -1,21 +1,31 @@
-use crate::value::{Primitive, TysonValue};
+use crate::value::{Primitive, TYSONDocument, TYSONValue};
 
-pub fn serialize(val: &TysonValue) -> String {
-    match val {
-        TysonValue::Map(prefix, data) => {
-            let contents: Vec<_> = data
-                .iter()
-                .map(|(left, value)|
-                    format!("{}:{}", left, serialize(value)))
-                .collect();
-            format!("{}{{{}}}", prefix, contents.join(","))
-        }
-        TysonValue::Array(prefix, data) => {
-            let contents: Vec<_> = data.iter().map(serialize).collect();
-            format!("{}[{}]", prefix, contents.join(","))
-        }
-        TysonValue::Primitive(data) => {
-            format!("{}", data)
+
+pub fn serialize_doc(doc: &TYSONDocument) -> String {
+    let mut contents: Vec<String> = vec![];
+
+    fn serialize_value(val: &TYSONValue) -> String {
+        match val {
+            TYSONValue::Map(prefix, data) => {
+                let contents: Vec<_> = data
+                    .iter()
+                    .map(|(left, value)|
+                        format!("{}:{}", left, serialize_value(value)))
+                    .collect();
+                format!("{}{{{}}}", prefix, contents.join(","))
+            }
+            TYSONValue::Vector(prefix, data) => {
+                let contents: Vec<_> = data.iter().map(serialize_value).collect();
+                format!("{}[{}]", prefix, contents.join(","))
+            }
+            TYSONValue::Primitive(data) => {
+                format!("{}", data)
+            }
         }
     }
+
+    for (key, val) in doc.items() {
+        contents.push(format!("{}:{}", key, serialize_value(val)));
+    }
+    format!("{}", contents.join(";"))
 }

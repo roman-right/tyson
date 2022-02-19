@@ -20,10 +20,10 @@ map_value = _{ "{" ~ "}" | "{" ~ pair ~ (separator ~ pair)* ~ (separator)? ~ "}"
 
 map = { prefix ~ map_value | map_value }
 
-array_value = _{ "[" ~ "]" | "[" ~ primitive ~ (separator ~ primitive)* ~ (separator)? ~ "]" }
+vector_item = _{ "[" ~ "]" | "[" ~ primitive ~ (separator ~ primitive)* ~ (separator)? ~ "]" }
 
-array = { prefix ~ array_value | array_value }
+vector = { prefix ~ vector_item | vector_item }
 
-item = _{ map | array | primitive }
+item = _{ map | vector | primitive }
 
-doc = { SOI ~ pair ~ ( separator ~ pair )* ~ (separator)? ~ EOI }
+document = { SOI ~ pair ~ ( separator ~ pair )* ~ (separator)? ~ EOI }
