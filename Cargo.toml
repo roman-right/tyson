@@ -1,11 +1,13 @@
 [package]
 name = "tyson"
 version = "0.1.0"
+authors = ["Roman Right <roman-right@protonmail.com>"]
 edition = "2021"
 description = "Typed Simple Object Notation"
+readme = "README.md"
+license = "Apache-2.0"
+license-file = "LICENSE"
 
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 pest = "2.1.3"
