@@ -9,7 +9,7 @@ license = "Apache-2.0"
 exclude = [
     "assets/*",
 ]
-
+repository = "https://github.com/roman-right/tyson"
 
 [dependencies]
 pest = "2.1.3"
