@@ -1,7 +1,7 @@
-mod de;
-mod se;
-mod value;
-mod errors;
+pub mod de;
+pub mod se;
+pub mod value;
+pub mod errors;
 
 extern crate pest;
 #[macro_use]
