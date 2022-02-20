@@ -7,10 +7,14 @@ pub struct TySONError {
 }
 
 impl TySONError {
-    pub fn new(msg: &str) -> Self {
+    pub(crate) fn new(msg: &str) -> Self {
         Self {
             msg: msg.to_string()
         }
+    }
+
+    pub fn unexpected_parsing() -> Self {
+       Self::new("Unexpected parsing error")
     }
 }
 

@@ -9,8 +9,8 @@ use crate::value::{Primitive, TySONDocument, TySONValue};
 struct TysonParser;
 
 
-pub fn deserialize_doc(data: String) -> Result<TySONDocument, TySONError> {
-    let pair = TysonParser::parse(Rule::document, data.as_str())?.next().ok_or(TySONError::new("Parsing error"))?;
+pub fn deserialize(data: String) -> Result<TySONDocument, TySONError> {
+    let pair = TysonParser::parse(Rule::document, data.as_str())?.next().ok_or(TySONError::unexpected_parsing())?;
 
     let mut result: TySONDocument = TySONDocument::new();
 
@@ -27,8 +27,8 @@ pub fn deserialize_doc(data: String) -> Result<TySONDocument, TySONError> {
                         }
                         _ => {
                             let mut inner_rules = pair.into_inner();
-                            if let TySONValue::Primitive(left) = deserialize_value(inner_rules.next().ok_or(TySONError::new("Parsing error"))?)? {
-                                data.push((left, deserialize_value(inner_rules.next().ok_or(TySONError::new("Parsing error"))?)?))
+                            if let TySONValue::Primitive(left) = deserialize_value(inner_rules.next().ok_or(TySONError::unexpected_parsing())?)? {
+                                data.push((left, deserialize_value(inner_rules.next().ok_or(TySONError::unexpected_parsing())?)?))
                             }
                         }
                     }
@@ -95,4 +95,3 @@ pub fn deserialize_doc(data: String) -> Result<TySONDocument, TySONError> {
         _ => unreachable!()
     }
 }
-

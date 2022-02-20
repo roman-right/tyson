@@ -1,7 +1,7 @@
 use crate::value::{TySONDocument, TySONValue};
 
 
-pub fn serialize_doc(doc: &TySONDocument) -> String {
+pub fn serialize(doc: &TySONDocument) -> String {
     let mut contents: Vec<String> = vec![];
 
     fn serialize_value(val: &TySONValue) -> String {
