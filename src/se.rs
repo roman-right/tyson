@@ -1,12 +1,12 @@
-use crate::value::{Primitive, TYSONDocument, TYSONValue};
+use crate::value::{TySONDocument, TySONValue};
 
 
-pub fn serialize_doc(doc: &TYSONDocument) -> String {
+pub fn serialize_doc(doc: &TySONDocument) -> String {
     let mut contents: Vec<String> = vec![];
 
-    fn serialize_value(val: &TYSONValue) -> String {
+    fn serialize_value(val: &TySONValue) -> String {
         match val {
-            TYSONValue::Map(prefix, data) => {
+            TySONValue::Map(prefix, data) => {
                 let contents: Vec<_> = data
                     .iter()
                     .map(|(left, value)|
@@ -14,11 +14,11 @@ pub fn serialize_doc(doc: &TYSONDocument) -> String {
                     .collect();
                 format!("{}{{{}}}", prefix, contents.join(","))
             }
-            TYSONValue::Vector(prefix, data) => {
+            TySONValue::Vector(prefix, data) => {
                 let contents: Vec<_> = data.iter().map(serialize_value).collect();
                 format!("{}[{}]", prefix, contents.join(","))
             }
-            TYSONValue::Primitive(data) => {
+            TySONValue::Primitive(data) => {
                 format!("{}", data)
             }
         }

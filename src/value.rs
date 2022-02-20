@@ -15,25 +15,25 @@ impl fmt::Display for Primitive {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum TYSONValue {
+pub enum TySONValue {
     Primitive(Primitive),
-    Map(String, Vec<(Primitive, TYSONValue)>),
-    Vector(String, Vec<TYSONValue>),
+    Map(String, Vec<(Primitive, TySONValue)>),
+    Vector(String, Vec<TySONValue>),
 }
 
 #[derive(Debug)]
-pub struct TYSONDocument(Vec<(Primitive, TYSONValue)>);
+pub struct TySONDocument(Vec<(Primitive, TySONValue)>);
 
-impl TYSONDocument {
+impl TySONDocument {
     pub fn new() -> Self{
         Self(vec![])
     }
 
-    pub fn push(&mut self, item: (Primitive, TYSONValue)){
+    pub fn push(&mut self, item: (Primitive, TySONValue)){
         self.0.push(item);
     }
 
-    pub fn items(&self) -> &Vec<(Primitive, TYSONValue)>{
+    pub fn items(&self) -> &Vec<(Primitive, TySONValue)>{
         &self.0
     }
 }
