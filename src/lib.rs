@@ -7,9 +7,6 @@ extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
-use crate::de::deserialize;
-use crate::se::serialize;
-
 #[cfg(test)]
 mod tests {
     use crate::de::deserialize;
