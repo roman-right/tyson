@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt;
 
 #[derive(Debug, Eq, PartialEq)]
@@ -37,3 +38,4 @@ impl TySONDocument {
         &self.0
     }
 }
+
