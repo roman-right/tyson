@@ -1,6 +1,6 @@
 pub mod de;
 pub mod se;
-pub mod value;
+pub mod primitive;
 pub mod errors;
 
 extern crate pest;
@@ -9,12 +9,11 @@ extern crate pest_derive;
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
     use pest::iterators::Pair;
     use crate::de::Desereilize;
     use crate::errors::TySONError;
-    use crate::se::serialize;
-    use crate::value::{Primitive, TySONDocument};
-    use crate::value::TySONValue;
+    use crate::primitive::Primitive;
 
     #[test]
     fn de_se() {
@@ -27,37 +26,56 @@ mod tests {
 
 
         #[derive(Debug)]
-        struct Doc{
-            items: Vec<(Primitive, TySONValue)>
+        struct Doc {
+            items: Vec<(Primitive, TySONValue)>,
         }
 
-        impl Desereilize<TySONValue, Primitive> for Doc{
+        #[derive(Debug, Eq, PartialEq)]
+        pub enum TySONValue {
+            Primitive(Primitive),
+            Map(String, Vec<(Primitive, TySONValue)>),
+            Vector(String, Vec<TySONValue>),
+        }
 
-
-            fn from_map(prefix: String, pairs: Vec<(Primitive, TySONValue)>) -> TySONValue {
-                TySONValue::Map(prefix, pairs)
-            }
-
-            fn from_vector(prefix: String, data: Vec<TySONValue>) -> TySONValue {
-                TySONValue::Vector(prefix, data)
-            }
-
-            fn from_primitive(val: Primitive) -> Primitive {
-                val
-            }
-
-            fn wrap_primitive(p: Primitive) -> TySONValue {
-                TySONValue::Primitive(p)
-            }
-
-            fn new() -> Self {
+        impl Desereilize<TySONValue, Primitive> for Doc {
+            fn new_document() -> Self {
                 Self {
                     items: vec![]
                 }
             }
 
-            fn push(&mut self, pair: (Primitive, TySONValue)) {
+            fn add_to_document(&mut self, pair: (Primitive, TySONValue)) {
                 self.items.push(pair);
+            }
+
+            fn new_map(prefix: String) -> TySONValue {
+                TySONValue::Map(prefix, vec![])
+            }
+
+            fn add_to_map(map: &mut TySONValue, data: (Primitive, TySONValue)) {
+                if let TySONValue::Map(_, container) = map {
+                    container.push(data)
+                }
+            }
+
+
+            fn new_vector(prefix: String) -> TySONValue {
+                TySONValue::Vector(prefix, vec![])
+            }
+
+            fn add_to_vector(vector: &mut TySONValue, data: TySONValue) {
+                if let TySONValue::Vector(_, container) = vector {
+                    container.push(data)
+                }
+            }
+
+
+            fn new_primitive(prefix: String, val: String) -> Primitive {
+                Primitive(prefix, val)
+            }
+
+            fn wrap_primitive(p: Primitive) -> TySONValue {
+                TySONValue::Primitive(p)
             }
         }
 

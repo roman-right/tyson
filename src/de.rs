@@ -2,15 +2,15 @@ use pest::iterators::Pair;
 use pest::Parser;
 
 use crate::errors::TySONError;
-use crate::value::{Primitive, TySONDocument, TySONValue};
+use crate::primitive::Primitive as TySONPrimitive;
 
 #[derive(Parser)]
 #[grammar = "tyson.pest"]
 struct TySONParser;
 
 
-pub trait Desereilize<C, P> {
-    fn deserialize_primitive(pair: Pair<Rule>) -> Result<P, TySONError> {
+pub trait Desereilize<Container, Primitive> {
+    fn deserialize_primitive(pair: Pair<Rule>) -> Result<Primitive, TySONError> {
         return match pair.as_rule() {
             Rule::primitive => {
                 let mut data: String = String::new();
@@ -25,50 +25,37 @@ pub trait Desereilize<C, P> {
                         }
                     }
                 };
-                let val = Primitive(prefix, data);
-                Ok(Self::from_primitive(val))
+                Ok(Self::new_primitive(prefix, data))
             }
             _ => unreachable!()
         };
     }
 
-    fn deserialize_container(pair: Pair<Rule>) -> Result<C, TySONError> {
+    fn deserialize_container(pair: Pair<Rule>) -> Result<Container, TySONError> {
         return match pair.as_rule() {
             Rule::map => {
-                let mut data: Vec<(P, C)> = vec![];
-                let mut prefix: String = String::new();
-                for pair in pair.into_inner()
+                let mut inner_rules = pair.into_inner();
+                let prefix = inner_rules.next().ok_or(TySONError::unexpected_parsing())?.into_inner().as_str().to_string();
+                let mut map = Self::new_map(prefix);
+                for pair in inner_rules
                 {
-                    match pair.as_rule() {
-                        Rule::prefix => {
-                            prefix = pair.as_str().to_string();
-                        }
-                        _ => {
-                            let mut inner_rules = pair.into_inner();
-                            if let left = Self::deserialize_primitive(inner_rules.next().ok_or(TySONError::unexpected_parsing())?)? {
-                                data.push((left, Self::deserialize_container(inner_rules.next().ok_or(TySONError::unexpected_parsing())?)?))
-                            }
-                        }
+                    let mut inner_rules = pair.into_inner();
+                    if let left = Self::deserialize_primitive(inner_rules.next().ok_or(TySONError::unexpected_parsing())?)? {
+                        Self::add_to_map(&mut map, (left, Self::deserialize_container(inner_rules.next().ok_or(TySONError::unexpected_parsing())?)?))
                     }
                 };
-                Ok(Self::from_map(prefix, data))
+                Ok(map)
             }
             Rule::vector => {
                 {
-                    let mut data: Vec<C> = vec![];
-                    let mut prefix: String = String::new();
-                    for pair in pair.into_inner()
+                    let mut inner_rules = pair.into_inner();
+                    let prefix = inner_rules.next().ok_or(TySONError::unexpected_parsing())?.into_inner().as_str().to_string();
+                    let mut vector = Self::new_vector(prefix);
+                    for pair in inner_rules
                     {
-                        match pair.as_rule() {
-                            Rule::prefix => {
-                                prefix = pair.as_str().to_string();
-                            }
-                            _ => {
-                                data.push(Self::deserialize_container(pair)?);
-                            }
-                        }
+                        Self::add_to_vector(&mut vector, Self::deserialize_container(pair)?);
                     };
-                    Ok(Self::from_vector(prefix, data))
+                    Ok(vector)
                 }
             }
             Rule::primitive => {
@@ -82,7 +69,7 @@ pub trait Desereilize<C, P> {
     fn deserialize(data: String) -> Result<Self, TySONError> where Self: Sized {
         let pair = TySONParser::parse(Rule::document, data.as_str())?.next().ok_or(TySONError::unexpected_parsing())?;
 
-        let mut result = Self::new();
+        let mut result = Self::new_document();
 
         match pair.as_rule() {
             Rule::document => {
@@ -93,7 +80,7 @@ pub trait Desereilize<C, P> {
                             if let key = Self::deserialize_primitive(v)? {
                                 match inner_rules.next() {
                                     Some(v) => {
-                                        result.push((key, Self::deserialize_container(v)?));
+                                        result.add_to_document((key, Self::deserialize_container(v)?));
                                     }
                                     _ => unreachable!()
                                 }
@@ -108,15 +95,19 @@ pub trait Desereilize<C, P> {
         }
     }
 
-    fn from_map(prefix: String, data: Vec<(P, C)>) -> C;
+    fn new_map(prefix: String) -> Container;
 
-    fn from_vector(prefix: String, data: Vec<C>) -> C;
+    fn add_to_map(map: &mut Container, data: (Primitive, Container));
 
-    fn from_primitive(val: Primitive) -> P;
+    fn new_vector(prefix: String) -> Container;
 
-    fn wrap_primitive(p: P) -> C;
+    fn add_to_vector(vector: &mut Container, data: Container);
 
-    fn new() -> Self;
+    fn new_primitive(prefix: String, value: String) -> Primitive;
 
-    fn push(&mut self, pair: (P, C));
+    fn wrap_primitive(p: Primitive) -> Container;
+
+    fn new_document() -> Self;
+
+    fn add_to_document(&mut self, pair: (Primitive, Container));
 }
