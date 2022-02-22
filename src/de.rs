@@ -2,7 +2,6 @@ use pest::iterators::Pair;
 use pest::Parser;
 
 use crate::errors::TySONError;
-use crate::primitive::Primitive as TySONPrimitive;
 
 #[derive(Parser)]
 #[grammar = "tyson.pest"]
@@ -11,24 +10,19 @@ struct TySONParser;
 
 pub trait Desereilize<Container, Primitive> {
     fn deserialize_primitive(pair: Pair<Rule>) -> Result<Primitive, TySONError> {
-        return match pair.as_rule() {
-            Rule::primitive => {
-                let mut data: String = String::new();
-                let mut prefix: String = String::new();
-                for pair in pair.into_inner() {
-                    match pair.as_rule() {
-                        Rule::prefix => {
-                            prefix = pair.as_str().to_string();
-                        }
-                        _ => {
-                            data = pair.as_str().to_string();
-                        }
-                    }
-                };
-                Ok(Self::new_primitive(prefix, data))
+        let mut data: String = String::new();
+        let mut prefix: String = String::new();
+        for pair in pair.into_inner() {
+            match pair.as_rule() {
+                Rule::prefix => {
+                    prefix = pair.as_str().to_string();
+                }
+                _ => {
+                    data = pair.as_str().to_string();
+                }
             }
-            _ => unreachable!()
         };
+        Ok(Self::new_primitive(prefix, data))
     }
 
     fn deserialize_container(pair: Pair<Rule>) -> Result<Container, TySONError> {
@@ -40,9 +34,8 @@ pub trait Desereilize<Container, Primitive> {
                 for pair in inner_rules
                 {
                     let mut inner_rules = pair.into_inner();
-                    if let left = Self::deserialize_primitive(inner_rules.next().ok_or(TySONError::unexpected_parsing())?)? {
-                        Self::add_to_map(&mut map, (left, Self::deserialize_container(inner_rules.next().ok_or(TySONError::unexpected_parsing())?)?))
-                    }
+                    let left = Self::deserialize_primitive(inner_rules.next().ok_or(TySONError::unexpected_parsing())?)?;
+                    Self::add_to_map(&mut map, (left, Self::deserialize_container(inner_rules.next().ok_or(TySONError::unexpected_parsing())?)?))
                 };
                 Ok(map)
             }
@@ -77,14 +70,8 @@ pub trait Desereilize<Container, Primitive> {
                     let mut inner_rules = pair.into_inner();
                     match inner_rules.next() {
                         Some(v) => {
-                            if let key = Self::deserialize_primitive(v)? {
-                                match inner_rules.next() {
-                                    Some(v) => {
-                                        result.add_to_document((key, Self::deserialize_container(v)?));
-                                    }
-                                    _ => unreachable!()
-                                }
-                            }
+                            let key = Self::deserialize_primitive(v)?;
+                            result.add_to_document((key, Self::deserialize_container(inner_rules.next().ok_or(TySONError::unexpected_parsing())?)?));
                         }
                         _ => {}
                     }
@@ -94,6 +81,10 @@ pub trait Desereilize<Container, Primitive> {
             _ => unreachable!()
         }
     }
+
+    fn new_document() -> Self;
+
+    fn add_to_document(&mut self, pair: (Primitive, Container));
 
     fn new_map(prefix: String) -> Container;
 
@@ -106,8 +97,4 @@ pub trait Desereilize<Container, Primitive> {
     fn new_primitive(prefix: String, value: String) -> Primitive;
 
     fn wrap_primitive(p: Primitive) -> Container;
-
-    fn new_document() -> Self;
-
-    fn add_to_document(&mut self, pair: (Primitive, Container));
 }
