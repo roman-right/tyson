@@ -3,6 +3,10 @@ pub mod se;
 pub mod primitive;
 pub mod errors;
 mod example;
+mod map;
+mod item;
+mod vector;
+mod document;
 
 extern crate pest;
 #[macro_use]
