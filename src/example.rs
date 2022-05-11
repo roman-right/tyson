@@ -1,56 +1,136 @@
+use std::collections::HashMap;
+use std::hash::{Hash, Hasher};
 use crate::de::Desereilize;
-use crate::primitive::Primitive;
+use crate::document::TySONDocument;
+use crate::item::TySONItem;
+use crate::map::TySONMap;
+use crate::primitive::{Primitive, TySONPrimitive};
+use crate::vector::TySONVector;
+
+
+pub trait HashablePrimitive: Hash + PartialEq + TySONPrimitive {}
+
+#[derive(Debug, Hash, PartialEq)]
+pub struct IntPrimitive {
+    value: i64,
+}
+
+#[derive(Debug, Hash, PartialEq)]
+pub struct StrPrimitive {
+    value: String,
+}
+
+impl TySONItem for IntPrimitive {
+    fn get_prefix(&self) -> String {
+        "n".to_string()
+    }
+}
+
+
+impl HashablePrimitive for IntPrimitive {}
+
+impl HashablePrimitive for StrPrimitive {}
+
+impl TySONPrimitive for IntPrimitive {
+    fn new(value: String) -> Self {
+        let num: i64 = value.parse().unwrap();
+        Self {
+            value: num
+        }
+    }
+}
+
+impl TySONItem for StrPrimitive {
+    fn get_prefix(&self) -> String {
+        "s".to_string()
+    }
+}
+
+impl TySONPrimitive for StrPrimitive {
+    fn new(value: String) -> Self {
+        Self {
+            value
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct HMap {
+    values: HashMap<Box<dyn HashablePrimitive>, Box<dyn TySONItem>>,
+}
+
+impl TySONItem for HMap {
+    fn get_prefix(&self) -> String {
+        "h".to_string()
+    }
+}
+
+impl TySONMap for HMap {
+    fn new() -> Self {
+        Self {
+            values: HashMap::new()
+        }
+    }
+
+    fn insert(&mut self, k: Box<dyn TySONPrimitive>, v: Box<dyn TySONItem>) {
+        &self.values.insert(k, v);
+    }
+}
+
+#[derive(Debug)]
+pub struct Vector {
+    values: Vec<Box<dyn TySONItem>>,
+}
+
+impl TySONItem for Vector {
+    fn get_prefix(&self) -> String {
+        "v".to_string()
+    }
+}
+
+impl TySONVector for Vector {
+    fn new() -> Self {
+        Self {
+            values: vec![]
+        }
+    }
+
+    fn push(&mut self, item: Box<dyn TySONItem>) {
+        &self.push(item);
+    }
+}
 
 #[derive(Debug)]
 pub struct Doc {
-    items: Vec<(Primitive, Value)>,
+    items: Vec<(Box<dyn TySONPrimitive>, Box<dyn TySONItem>)>,
 }
 
-#[derive(Debug, Eq, PartialEq)]
-pub enum Value {
-    WrappedPrimitive(Primitive),
-    Map(String, Vec<(Primitive, Value)>),
-    Vector(String, Vec<Value>),
-}
-
-impl Desereilize<Value, Primitive> for Doc {
+impl Desereilize for Doc {
     fn new_document() -> Self {
         Self {
             items: vec![]
         }
     }
 
-    fn add_to_document(&mut self, pair: (Primitive, Value)) {
-        self.items.push(pair);
+    fn add_to_document(&mut self, data: (Box<dyn TySONPrimitive>, Box<dyn TySONItem>)) {
+        self.items.push(data)
     }
 
-    fn new_map(prefix: String) -> Value {
-        Value::Map(prefix, vec![])
+    fn new_vector(prefix: String) -> Box<dyn TySONVector> {
+        Box::new(Vector::new())
     }
 
-    fn add_to_map(map: &mut Value, data: (Primitive, Value)) {
-        if let Value::Map(_, container) = map {
-            container.push(data)
-        }
+    fn new_map(prefix: String) -> Box<dyn TySONMap> {
+        Box::new(HMap::new())
     }
 
-
-    fn new_vector(prefix: String) -> Value {
-        Value::Vector(prefix, vec![])
-    }
-
-    fn add_to_vector(vector: &mut Value, data: Value) {
-        if let Value::Vector(_, container) = vector {
-            container.push(data)
-        }
-    }
-
-
-    fn new_primitive(prefix: String, val: String) -> Primitive {
-        Primitive(prefix, val)
-    }
-
-    fn wrap_primitive(p: Primitive) -> Value {
-        Value::WrappedPrimitive(p)
+    fn new_primitive(prefix: String, data: String) -> Box<dyn TySONPrimitive> {
+        return match prefix.as_str() {
+            "s" => { Box::new(StrPrimitive::new(data)) }
+            "n" => { Box::new(StrPrimitive::new(data)) }
+            _ => unreachable!()
+        };
     }
 }
+
+impl TySONDocument for Doc {}

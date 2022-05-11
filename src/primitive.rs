@@ -1,4 +1,7 @@
+use std::collections::HashMap;
 use std::fmt;
+use std::fmt::Debug;
+use crate::item::TySONItem;
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Primitive(pub String, pub String);
@@ -16,4 +19,8 @@ impl fmt::Display for Primitive {
 
 
 
-
+pub trait TySONPrimitive:TySONItem{
+    fn new(value: String) -> Self
+    where
+        Self: Sized;
+}
