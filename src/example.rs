@@ -1,10 +1,10 @@
 use std::collections::HashMap;
-use std::hash::{Hash, Hasher};
+use std::hash::Hash;
 use crate::de::Desereilize;
 use crate::document::TySONDocument;
 use crate::item::TySONItem;
 use crate::map::TySONMap;
-use crate::primitive::{Primitive, TySONPrimitive};
+use crate::primitive::TySONPrimitive;
 use crate::vector::TySONVector;
 
 
@@ -56,7 +56,7 @@ impl TySONPrimitive for StrPrimitive {
 
 #[derive(Debug)]
 pub struct HMap {
-    values: HashMap<Box<dyn HashablePrimitive>, Box<dyn TySONItem>>,
+    values: HashMap<String, Box<dyn TySONItem>>,
 }
 
 impl TySONItem for HMap {
@@ -73,7 +73,7 @@ impl TySONMap for HMap {
     }
 
     fn insert(&mut self, k: Box<dyn TySONPrimitive>, v: Box<dyn TySONItem>) {
-        &self.values.insert(k, v);
+       let _ =  &self.values.insert(k.get_prefix(), v);
     }
 }
 
@@ -96,7 +96,7 @@ impl TySONVector for Vector {
     }
 
     fn push(&mut self, item: Box<dyn TySONItem>) {
-        &self.push(item);
+        let _ = &self.values.push(item);
     }
 }
 
@@ -116,21 +116,71 @@ impl Desereilize for Doc {
         self.items.push(data)
     }
 
-    fn new_vector(prefix: String) -> Box<dyn TySONVector> {
+    fn new_vector(_prefix: String) -> Box<dyn TySONVector> {
         Box::new(Vector::new())
     }
 
-    fn new_map(prefix: String) -> Box<dyn TySONMap> {
+    fn new_map(_prefix: String) -> Box<dyn TySONMap> {
         Box::new(HMap::new())
     }
 
     fn new_primitive(prefix: String, data: String) -> Box<dyn TySONPrimitive> {
         return match prefix.as_str() {
             "s" => { Box::new(StrPrimitive::new(data)) }
-            "n" => { Box::new(StrPrimitive::new(data)) }
+            "n" => { Box::new(IntPrimitive::new(data)) }
             _ => unreachable!()
         };
     }
 }
 
 impl TySONDocument for Doc {}
+
+
+// use std::fmt::Debug;
+// use crate::upcaster::Upcaster;
+//
+// pub trait Super: AsDynSuper {}
+//
+//
+//
+// impl<T: Super + Sized> AsDynSuper for T {
+//     fn as_dyn_super<'a>(self: Box<Self>) -> Box<dyn Super + 'a>
+//         where
+//             Self: 'a,
+//     {
+//         self
+//     }
+// }
+//
+// pub trait Sub: Super {}
+//
+// pub fn upcast(obj: Box<dyn Sub>) -> Box<dyn Super> {
+//     obj.as_dyn_super()
+// }
+
+// #[derive(Debug)]
+// struct TestStruct {
+//     s: String,
+// }
+//
+// impl Super for TestStruct {}
+//
+// // impl AsDynSuper for TestStruct {
+// //     fn as_dyn_super<'a>(self: Box<Self>) -> Box<dyn Super + 'a> where Self: 'a {
+// //         todo!()
+// //     }
+// // }
+//
+// impl Sub for TestStruct {}
+//
+// pub fn create_test_struct() -> Box<dyn Sub>{
+//     let s = "test".to_string();
+//     let t = TestStruct{
+//         s
+//     };
+//     Box::new(t)
+// }
+//
+// pub fn print_s(t: Box<dyn Super>){
+//     print!("{:?}", t);
+// }

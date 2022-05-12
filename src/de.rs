@@ -36,7 +36,7 @@ pub trait Desereilize {
         for pair in inner_rules
         {
             vector.push(Self::route_deserialization(pair)?);
-        };
+        }
         Ok(vector)
     }
 
@@ -55,9 +55,18 @@ pub trait Desereilize {
 
     fn route_deserialization(pair: Pair<Rule>) -> Result<Box<dyn TySONItem>, TySONError> {
         return match pair.as_rule() {
-            Rule::map => { Ok(Self::deserialize_map(pair)?.as_item()) }
-            Rule::vector => { Ok(Self::deserialize_vector(pair)?.as_item()) }
-            Rule::primitive => { Ok(Self::deserialize_primitive(pair)?.as_item()) }
+            Rule::map => {
+                let res = Self::deserialize_map(pair)?;
+                Ok(res.as_upcaster())
+            }
+            Rule::vector => {
+                let res = Self::deserialize_vector(pair)?;
+                Ok(res.as_upcaster())
+            }
+            Rule::primitive => {
+                let res = Self::deserialize_primitive(pair)?;
+                Ok(res.as_upcaster())
+            }
             _ => unreachable!()
         };
     }

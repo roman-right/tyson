@@ -7,6 +7,7 @@ pub mod se;
 pub mod primitive;
 pub mod errors;
 mod example;
+mod upcaster;
 mod map;
 mod item;
 mod vector;
@@ -14,21 +15,22 @@ mod document;
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
 
     use crate::de::Desereilize;
-    use crate::example::{Doc, HMap, IntPrimitive, StrPrimitive};
-    use crate::item::TySONItem;
-    use crate::map::TySONMap;
-    use crate::primitive::TySONPrimitive;
+    use crate::example::Doc;
 
     #[test]
     fn de_se() {
+        // let data = r#"
+        // s|123|: h{s|s|: s|100|; s|p|:s|100|};
+        // s|124|: l[s|100|; s|p|];
+        // s|125|: h{s|s|: s|100|; s|p|:s|100|};
+        // s|123|: h{s|s|: s|100|; s|p|:s|100|};
+        // "#;
+
         let data = r#"
-        s|123|: h{s|s|: s|100|; s|p|:s|100|};
+        s|123|:n|123|;
         s|124|: l[s|100|; s|p|];
-        s|125|: h{s|s|: s|100|; s|p|:s|100|};
-        s|123|: h{s|s|: s|100|; s|p|:s|100|};
         "#;
 
 
@@ -37,6 +39,11 @@ mod tests {
 
         let doc = Doc::deserialize(data.to_string()).unwrap();
         print!("{:?}", doc);
+
+
+        // let t = create_test_struct();
+        // let new_t = upcast(t);
+        // print_s(new_t)
 
         // let i_p: IntPrimitive = IntPrimitive::new("123".to_string());
         // let s_p: StrPrimitive = StrPrimitive::new("456".to_string());
