@@ -21,42 +21,17 @@ mod tests {
 
     #[test]
     fn de_se() {
-        // let data = r#"
-        // s|123|: h{s|s|: s|100|; s|p|:s|100|};
-        // s|124|: l[s|100|; s|p|];
-        // s|125|: h{s|s|: s|100|; s|p|:s|100|};
-        // s|123|: h{s|s|: s|100|; s|p|:s|100|};
-        // "#;
-
         let data = r#"
-        s|123|:n|123|;
+        s|123|: h{s|s|: s|100|; s|p|:s|100|};
         s|124|: l[s|100|; s|p|];
+        s|125|: h{s|s|: s|100|; s|p|:s|100|};
+        s|123|: h{s|s|: s|100|; s|p|:s|100|};
         "#;
-
-
-
-
 
         let doc = Doc::deserialize(data.to_string()).unwrap();
         print!("{:?}", doc);
 
 
-        // let t = create_test_struct();
-        // let new_t = upcast(t);
-        // print_s(new_t)
-
-        // let i_p: IntPrimitive = IntPrimitive::new("123".to_string());
-        // let s_p: StrPrimitive = StrPrimitive::new("456".to_string());
-        //
-        // let mut m: Vec<(String, Box<dyn TySONItem>)> = Vec::new();
-        //
-        // m.push(("one".to_string(), Box::new(i_p)));
-        // m.push(("two".to_string(), Box::new(s_p)));
-        //
-        // let m1: HMap = HMap::new(m);
-        //
-        //
-        // print!("{:?}", m1);
 
 
         // let des = deserialize(data.to_string()).unwrap();
