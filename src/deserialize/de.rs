@@ -2,10 +2,10 @@ use pest::iterators::Pair;
 use pest::Parser;
 
 use crate::errors::TySONError;
-use crate::item::TySONItem;
-use crate::map::TySONMap;
-use crate::primitive::TySONPrimitive;
-use crate::vector::TySONVector;
+use crate::deserialize::item::{BaseTySONItemInterface, TySONItem};
+use crate::deserialize::map::TySONMap;
+use crate::deserialize::primitive::TySONPrimitive;
+use crate::deserialize::vector::TySONVector;
 
 #[derive(Parser)]
 #[grammar = "tyson.pest"]
@@ -53,19 +53,19 @@ pub trait Desereilize {
         Ok(map)
     }
 
-    fn route_deserialization(pair: Pair<Rule>) -> Result<Box<dyn TySONItem>, TySONError> {
+    fn route_deserialization(pair: Pair<Rule>) -> Result<TySONItem, TySONError> {
         return match pair.as_rule() {
             Rule::map => {
                 let res = Self::deserialize_map(pair)?;
-                Ok(res.as_upcaster())
+                Ok(TySONItem::Map(res))
             }
             Rule::vector => {
                 let res = Self::deserialize_vector(pair)?;
-                Ok(res.as_upcaster())
+                Ok(TySONItem::Vector(res))
             }
             Rule::primitive => {
                 let res = Self::deserialize_primitive(pair)?;
-                Ok(res.as_upcaster())
+                Ok(TySONItem::Primitive(res))
             }
             _ => unreachable!()
         };
@@ -97,7 +97,7 @@ pub trait Desereilize {
 
     fn new_document() -> Self;
 
-    fn add_to_document(&mut self, data: (Box<dyn TySONPrimitive>, Box<dyn TySONItem>));
+    fn add_to_document(&mut self, data: (Box<dyn TySONPrimitive>, TySONItem));
 
     fn new_vector(prefix: String) -> Box<dyn TySONVector>;
 

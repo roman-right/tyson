@@ -1,5 +1,5 @@
 use pest::error::Error;
-use crate::de::Rule;
+use crate::deserialize::de::Rule;
 
 #[derive(Debug)]
 pub struct TySONError {

@@ -2,21 +2,15 @@ extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
-pub mod de;
-pub mod se;
-pub mod primitive;
 pub mod errors;
 mod example;
-mod upcaster;
-mod map;
-mod item;
-mod vector;
-mod document;
+mod deserialize;
+mod serialize;
 
 #[cfg(test)]
 mod tests {
 
-    use crate::de::Desereilize;
+    use crate::deserialize::de::Desereilize;
     use crate::example::Doc;
 
     #[test]
@@ -24,12 +18,17 @@ mod tests {
         let data = r#"
         s|123|: h{s|s|: s|100|; s|p|:s|100|};
         s|124|: l[s|100|; s|p|];
-        s|125|: h{s|s|: s|100|; s|p|:s|100|};
+        s|125|: h{s|s|: s|100|, s|p|:s|100|};
         s|123|: h{s|s|: s|100|; s|p|:s|100|};
         "#;
 
         let doc = Doc::deserialize(data.to_string()).unwrap();
-        print!("{:?}", doc);
+        println!("{:?}", doc);
+
+
+        // println!("{:?}", doc.serialize());
+
+
 
 
 
