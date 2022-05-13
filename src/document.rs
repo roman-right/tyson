@@ -1,4 +1,4 @@
-use crate::deserialize::de::Desereilize;
+use crate::de::Desereilize;
 
 #[derive(Parser)]
 #[grammar = "tyson.pest"]

@@ -2,10 +2,10 @@ use pest::iterators::Pair;
 use pest::Parser;
 
 use crate::errors::TySONError;
-use crate::deserialize::item::{BaseTySONItemInterface, TySONItem};
-use crate::deserialize::map::TySONMap;
-use crate::deserialize::primitive::TySONPrimitive;
-use crate::deserialize::vector::TySONVector;
+use crate::item::TySONItem;
+use crate::map::TySONMap;
+use crate::primitive::TySONPrimitive;
+use crate::vector::TySONVector;
 
 #[derive(Parser)]
 #[grammar = "tyson.pest"]

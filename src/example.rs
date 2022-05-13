@@ -1,15 +1,14 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::hash::Hash;
-use crate::deserialize::de::Desereilize;
-use crate::deserialize::document::TySONDocument;
-use crate::deserialize::item::{BaseTySONItemInterface, TySONItem};
-use crate::deserialize::map::TySONMap;
-use crate::deserialize::primitive::TySONPrimitive;
-use crate::deserialize::vector::TySONVector;
-use crate::serialize::se::{SerializeDoc, SerializeItem};
+use crate::de::Desereilize;
+use crate::document::TySONDocument;
+use crate::item::{BaseTySONItemInterface, TySONItem};
+use crate::map::TySONMap;
+use crate::primitive::TySONPrimitive;
+use crate::se::Serialize;
+use crate::vector::TySONVector;
 
 
-pub trait HashablePrimitive: Hash + PartialEq + TySONPrimitive {}
 
 #[derive(Debug, Hash, PartialEq)]
 pub struct IntPrimitive {
@@ -28,16 +27,16 @@ impl BaseTySONItemInterface for IntPrimitive {
 }
 
 
-impl HashablePrimitive for IntPrimitive {}
-
-impl HashablePrimitive for StrPrimitive {}
-
 impl TySONPrimitive for IntPrimitive {
     fn new(value: String) -> Self {
         let num: i64 = value.parse().unwrap();
         Self {
             value: num
         }
+    }
+
+    fn get_string_value(&self) -> String {
+        self.value.to_string()
     }
 }
 
@@ -53,28 +52,40 @@ impl TySONPrimitive for StrPrimitive {
             value
         }
     }
+
+    fn get_string_value(&self) -> String {
+        self.value.to_string()
+    }
 }
 
 #[derive(Debug)]
-pub struct HMap {
-    values: HashMap<String, TySONItem>,
+pub struct TestMap {
+    values: BTreeMap<String, TySONItem>,
 }
 
-impl BaseTySONItemInterface for HMap {
+impl BaseTySONItemInterface for TestMap {
     fn get_prefix(&self) -> String {
         "h".to_string()
     }
 }
 
-impl TySONMap for HMap {
+impl TySONMap for TestMap {
     fn new() -> Self {
         Self {
-            values: HashMap::new()
+            values: BTreeMap::new()
         }
     }
 
     fn insert(&mut self, k: Box<dyn TySONPrimitive>, v: TySONItem) {
-       let _ =  &self.values.insert(k.get_prefix(), v);
+        let _ = &self.values.insert(k.get_string_value(), v);
+    }
+
+    fn get_items(&self) -> Vec<(Box<dyn TySONPrimitive>, &TySONItem)> {
+        let mut res: Vec<(Box<dyn TySONPrimitive>, &TySONItem)> = vec![];
+        for (k, v) in &self.values {
+            res.push((Box::new(StrPrimitive::new(k.to_string())), v))
+        }
+        res
     }
 }
 
@@ -99,11 +110,19 @@ impl TySONVector for Vector {
     fn push(&mut self, item: TySONItem) {
         let _ = &self.values.push(item);
     }
+
+    fn get_items(&self) -> Vec<&TySONItem> {
+        let mut res: Vec<&TySONItem> = vec![];
+        for value in &self.values {
+            res.push(value)
+        }
+        res
+    }
 }
 
 #[derive(Debug)]
 pub struct Doc {
-    items: Vec<(Box<dyn TySONPrimitive>, TySONItem)>,
+    items: Vec<(StrPrimitive, TySONItem)>,
 }
 
 impl Desereilize for Doc {
@@ -114,7 +133,7 @@ impl Desereilize for Doc {
     }
 
     fn add_to_document(&mut self, data: (Box<dyn TySONPrimitive>, TySONItem)) {
-        self.items.push(data)
+        self.items.push((StrPrimitive::new(data.0.get_string_value()), data.1))
     }
 
     fn new_vector(_prefix: String) -> Box<dyn TySONVector> {
@@ -122,7 +141,7 @@ impl Desereilize for Doc {
     }
 
     fn new_map(_prefix: String) -> Box<dyn TySONMap> {
-        Box::new(HMap::new())
+        Box::new(TestMap::new())
     }
 
     fn new_primitive(prefix: String, data: String) -> Box<dyn TySONPrimitive> {
@@ -136,14 +155,13 @@ impl Desereilize for Doc {
 
 impl TySONDocument for Doc {}
 
-// impl SerializeDoc for Doc{
-//     fn items(&self) -> Vec<(Box<dyn SerializeItem>, Box<dyn SerializeItem>)> {
-//         let mut res: Vec<(Box<dyn SerializeItem>, Box<dyn SerializeItem>)> = vec![];
-//         for i in self.items{
-//             // let j: Box<dyn SerializeItem> = i.0;
-//             // let k: Box<dyn SerializeItem> = i.1;
-//             res.push(i)
-//         }
-//         res
-//     }
-// }
+impl Serialize for Doc {
+    fn items(&self) -> Vec<(&dyn TySONPrimitive, &TySONItem)> {
+        let mut res: Vec<(&dyn TySONPrimitive, &TySONItem)> = vec![];
+        for (k, v) in &self.items {
+            let key = k as &dyn TySONPrimitive;
+            res.push((key, v))
+        }
+        res
+    }
+}
