@@ -4,7 +4,7 @@
 
 *Neil deGrasse Tyson - an astrophysicist, planetary scientist, author, and science communicator.*
 
-Typed Simple Object Notation (TySON) is a text-based type-customizable data-serialization format. The key feature of this format is typing. Each value (primitive and container) contains a type, which can be mapped to a specific data structure during implementation. This expands the ways of processing and storing data.
+**Typed Simple Object Notation (TySON)** is a text-based type-customizable data-serialization format. The key feature of this format is typing. Each value (primitive and container) contains a type, which can be mapped to a specific data structure during implementation. This expands the ways of processing and storing data.
 
 
 ## Grammar
