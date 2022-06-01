@@ -17,7 +17,7 @@ The document is key/value pairs separated with commas or semicolons. Key is prim
 
 ```
 k|foo|: v|bar|;
-k|one|: abs(v|bar|);
+k|one|: abs(n|3.14|);
 k|two|: l[n|1|, n|2|, n|3|];
 k|three|: o{n|1|:s|uno|, n|2|:s|dos|};
 ```
@@ -42,7 +42,7 @@ l[n|1|, n|2|, n|3|]
 
 The modifier consist of type and a pair of round brackets surrounding a single value. The type represented as strings, which consists of letters. Value could be any TySON token. 
 ```
-abs(v|bar|)
+abs(n|3.14|)
 ```
 
 ### Primitive
