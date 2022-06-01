@@ -20,10 +20,14 @@ map_value = _{ "{" ~ "}" | "{" ~ pair ~ (separator ~ pair)* ~ (separator)? ~ "}"
 
 map = { prefix ~ map_value | map_value }
 
-vector_item = _{ "[" ~ "]" | "[" ~ primitive ~ (separator ~ primitive)* ~ (separator)? ~ "]" }
+vector_item = _{ "[" ~ "]" | "[" ~ item ~ (separator ~ item)* ~ (separator)? ~ "]" }
 
 vector = { prefix ~ vector_item | vector_item }
 
-item = _{ map | vector | primitive }
+modifier = { prefix ~ "(" ~ item ~ ")" }
 
-document = { SOI ~ pair ~ ( separator ~ pair )* ~ (separator)? ~ EOI }
+item = _{ modifier | map | vector | primitive  }
+
+document_content = _{ pair ~ ( separator ~ pair )* ~ (separator)? | "" }
+
+document = { SOI  ~ document_content ~ EOI }
