@@ -6,7 +6,7 @@ char = _{
     | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
 }
 
-prefix = @{ ( LETTER | NUMBER | "&" | "#" | "@" | "^" | "." )+ }
+prefix = @{ ( LETTER | NUMBER | "&" | "#" | "@" | "^" | "." | "_" )+ }
 
 value = @{ char* }
 
@@ -28,6 +28,6 @@ modifier = { prefix ~ "(" ~ item ~ ")" }
 
 item = _{ modifier | map | vector | primitive  }
 
-document_content = _{ pair ~ ( separator ~ pair )* ~ (separator)? | "" }
+journal_content = _{ pair ~ ( separator ~ pair )* ~ (separator)? | "" }
 
-document = { SOI  ~ document_content ~ EOI }
+journal = { SOI  ~ journal_content ~ EOI }

@@ -9,11 +9,11 @@
 
 ## Grammar
 
-A TySON text is a sequence of tokens wrapped into a document. There are 4 types of tokens: vector, map, modifier, and primitive
+A TySON text is a sequence of tokens wrapped into a journal. There are 4 types of tokens: vector, map, modifier, and primitive
 
-### Document
+### Journal
 
-The document is key/value pairs separated with commas or semicolons. Key is primitive, value could be any TySON token.  A single colon comes after each key. Keys can be not unique.
+The journal is key/value pairs separated with commas or semicolons. Key is primitive, value could be any TySON token.  A single colon comes after each key. Keys can be not unique.
 
 ```
 k|foo|: v|bar|;
