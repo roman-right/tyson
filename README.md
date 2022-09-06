@@ -1,6 +1,6 @@
 ## TySON
 
-![Neil deGrasse Tyson](https://pbs.twimg.com/profile_images/74188698/NeilTysonOriginsA-Crop_400x400.jpg)
+![Neil deGrasse Tyson](https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Neil_deGrasse_Tyson_in_June_2017_(cropped).jpg/200px-Neil_deGrasse_Tyson_in_June_2017_(cropped).jpg)
 
 *Neil deGrasse Tyson - an astrophysicist, planetary scientist, author, and science communicator.*
 
